@@ -152,6 +152,7 @@ public class BaseMainActivity extends BaseActivity {
         final int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
         final View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(uiOptions);
+        CallbackBridge.nativeSetWindowAttrib(LWJGLGLFWKeycode.GLFW_HOVERED, 1);
     }
 
     @Override
@@ -159,8 +160,21 @@ public class BaseMainActivity extends BaseActivity {
         if (CallbackBridge.isGrabbing()){
             sendKeyPress(LWJGLGLFWKeycode.GLFW_KEY_ESCAPE);
         }
+        CallbackBridge.nativeSetWindowAttrib(LWJGLGLFWKeycode.GLFW_HOVERED, 0);
         mIsResuming = false;
         super.onPause();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        CallbackBridge.nativeSetWindowAttrib(LWJGLGLFWKeycode.GLFW_VISIBLE, 1);
+    }
+
+    @Override
+    protected void onStop() {
+        CallbackBridge.nativeSetWindowAttrib(LWJGLGLFWKeycode.GLFW_VISIBLE, 0);
+        super.onStop();
     }
 
     public static void fullyExit() {
@@ -183,7 +197,7 @@ public class BaseMainActivity extends BaseActivity {
         checkLWJGL3Installed();
         
         JREUtils.jreReleaseList = JREUtils.readJREReleaseProperties();
-        JREUtils.checkJavaArchitecture(this, JREUtils.jreReleaseList.get("OS_ARCH"));
+        Logger.getInstance().appendToLog("Architecture: " + Architecture.archAsString(Tools.DEVICE_ARCHITECTURE));
         checkJavaArgsIsLaunchable(JREUtils.jreReleaseList.get("JAVA_VERSION"));
         // appendlnToLog("Info: Custom Java arguments: \"" + LauncherPreferences.PREF_CUSTOM_JAVA_ARGS + "\"");
 
